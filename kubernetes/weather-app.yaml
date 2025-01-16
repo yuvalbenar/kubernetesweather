@@ -16,9 +16,9 @@ spec:
     spec:
       containers:
       - name: weather-app
-        image: yourdockerhubusername/weather-app:latest  # replace with your Docker Hub image name
+        image: yuvalbenar/kubernetesweather:latest  # Default to latest for initial testing
         ports:
-        - containerPort: 5001
+        - containerPort: 5000  # Ensure port matches your application configuration
 ---
 apiVersion: v1
 kind: Service
@@ -31,4 +31,4 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 5000
+    targetPort: 5000  # Match the container port to ensure correct routing

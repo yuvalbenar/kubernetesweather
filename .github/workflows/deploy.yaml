@@ -13,12 +13,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copy Kubernetes manifests to remote VM
+    - name: Set up SSH for deployment
       run: |
-        scp -o StrictHostKeyChecking=no -i ${{ secrets.VM_SSH_KEY }} kubernetes/weather-app.yaml yuval@sela-machine:/home/yuval/
+        sudo apt-get install -y sshpass
 
-    - name: Apply manifests on remote VM
+    - name: Replace image tag in Kubernetes YAML
       run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.VM_SSH_KEY }} yuval@sela-machine << EOF
-          kubectl apply -f /home/yuval/weather-app.yaml
-        EOF
+        IMAGE_TAG=${{ github.run_number }}
+        sed -i "s|yuvalbenar/kubernetesweather:latest|yuvalbenar/kubernetesweather:$IMAGE_TAG|g" kubernetes/weather-app.yaml
+
+    - name: SSH into VM and apply Kubernetes manifests
+      run: |
+        sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sela@34.140.118.235 "kubectl apply -f kubernetes/weather-app.yaml"
