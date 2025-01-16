@@ -22,6 +22,10 @@ jobs:
         IMAGE_TAG=${{ github.run_number }}
         sed -i "s|yuvalbenar/kubernetesweather:latest|yuvalbenar/kubernetesweather:$IMAGE_TAG|g" kubernetes/weather-app.yaml
 
+    - name: Copy Kubernetes manifest to remote VM
+      run: |
+        sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null kubernetes/weather-app.yaml sela@34.140.118.235:/home/sela/
+
     - name: SSH into VM and apply Kubernetes manifests
       run: |
-        sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sela@34.140.118.235 "kubectl apply -f kubernetes/weather-app.yaml"
+        sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sela@34.140.118.235 "kubectl apply -f /home/sela/weather-app.yaml"
