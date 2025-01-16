@@ -1,0 +1,24 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy Kubernetes manifests to remote VM
+      run: |
+        scp -o StrictHostKeyChecking=no -i ${{ secrets.VM_SSH_KEY }} kubernetes/weather-app.yaml yuval@sela-machine:/home/yuval/
+
+    - name: Apply manifests on remote VM
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ${{ secrets.VM_SSH_KEY }} yuval@sela-machine << EOF
+          kubectl apply -f /home/yuval/weather-app.yaml
+        EOF
